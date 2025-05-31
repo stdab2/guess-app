@@ -1,16 +1,17 @@
 import './App.css'
-
 import { useState } from "react"
 import { clsx } from "clsx"
 import { languages } from "./utils/languages"
 import type Languages from "./utils/languageInterface"
 import { getFarewellText, getRandomWord } from "./utils/utils"
 import Confetti from "react-confetti"
+import getHint from "./api/anthropic"
 
 
 export default function AssemblyEndgame() {
     const [currentWord, setCurrentWord] = useState<string>(() => getRandomWord())
     const [guessedLetters, setGuessedLetters] = useState<Array<string>>([])
+    const [hint, setHint] = useState<Array<string>>([])
 
     const numGuessesLeft = languages.length - 1
     const wrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
@@ -123,6 +124,14 @@ export default function AssemblyEndgame() {
         return null
     }
 
+    async function newHint() {
+      const result: string | null = await getHint(currentWord, guessedLetters.join(", "), hint.join("| "))
+      if (typeof result === "string") {
+        setHint(prev => {
+          return [...prev, result]})
+      }
+    }
+
     return (
         <main>
             {
@@ -181,6 +190,18 @@ export default function AssemblyEndgame() {
                     className="new-game"
                     onClick={startNewGame}
                 >New Game</button>}
+
+            {(!isGameOver && guessedLetters.length > 3) &&
+              <>
+                <button
+                    className="new-hint"
+                    onClick={newHint}
+                >Get a hint 🤔</button>
+
+                <h2>{hint[hint.length - 1]}</h2>
+              </>
+            }
+
         </main>
     )
 }
