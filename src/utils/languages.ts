@@ -1,4 +1,6 @@
-export const languages: Array<Object> = [
+import type Languages from "./languageInterface"
+
+export const languages: Array<Languages> = [
     {
         name: "HTML",
         backgroundColor: "#E2680F",
